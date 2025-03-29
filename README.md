@@ -96,3 +96,5 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 - UNIVESP
 - Professores e colegas que contribuíram com o projeto 
+- Empresas AWS Customer Support e Synerjet
+- Parque Tecnológico de São José dos Campos-SP
