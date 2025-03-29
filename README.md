@@ -90,7 +90,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 👤 Autores
 
-- **Claudiane Amaral** - *Desenvolvimento inicial* - [claudiane-art](https://github.com/claudiane-art)
+- **Claudiane Amaral** - *Desenvolvimento* - [claudiane-art](https://github.com/claudiane-art)
 
 ## 🙏 Agradecimentos
 
