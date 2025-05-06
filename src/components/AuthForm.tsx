@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { Plane, Lock, Mail, User, FileText } from 'lucide-react';
 
 interface AuthFormProps {
   type: 'login' | 'register';
@@ -136,103 +137,122 @@ export function AuthForm({ type: initialType }: AuthFormProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {type === 'register' ? 'Cadastro' : 'Login'}
+        <div className="flex justify-center mb-4">
+          <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full animate-float">
+            <Plane className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          </div>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          {type === 'register' ? 'Cadastro' : 'Bem-vindo'}
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          {type === 'register' ? 'Já tem uma conta?' : 'Ainda não tem uma conta?'}{' '}
-          <button
-            onClick={() => {
-              setType(type === 'register' ? 'login' : 'register');
-              setError(null);
-              setEmail('');
-              setPassword('');
-              setName('');
-              setCpf('');
-            }}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            {type === 'register' ? 'Faça login' : 'Cadastre-se'}
-          </button>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          {type === 'register' 
+            ? 'Já tem uma conta?' 
+            : 'Sistema de Capacitação para Mecânicos Aeronáuticos'}
         </p>
+        <button
+          onClick={() => {
+            setType(type === 'register' ? 'login' : 'register');
+            setError(null);
+            setEmail('');
+            setPassword('');
+            setName('');
+            setCpf('');
+          }}
+          className="mt-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+        >
+          {type === 'register' ? 'Faça login' : 'Criar nova conta'}
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {type === 'register' && (
           <>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Nome Completo
-              </label>
+            <div className="relative">
+              <div className="input-icon">
+                <User className="h-5 w-5" />
+              </div>
               <input
                 type="text"
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="form-input"
+                placeholder="Nome Completo"
                 required
               />
             </div>
-            <div>
-              <label htmlFor="cpf" className="block text-sm font-medium text-gray-700">
-                CPF
-              </label>
+            <div className="relative">
+              <div className="input-icon">
+                <FileText className="h-5 w-5" />
+              </div>
               <input
                 type="text"
                 id="cpf"
                 value={cpf}
                 onChange={(e) => setCpf(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="form-input"
+                placeholder="CPF"
                 required
               />
             </div>
           </>
         )}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
+        <div className="relative">
+          <div className="input-icon">
+            <Mail className="h-5 w-5" />
+          </div>
           <input
             type="email"
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="form-input"
+            placeholder="Email"
             required
           />
         </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Senha
-          </label>
+        <div className="relative">
+          <div className="input-icon">
+            <Lock className="h-5 w-5" />
+          </div>
           <input
             type="password"
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="form-input"
+            placeholder="Senha"
             required
             minLength={6}
           />
-          {type === 'register' && (
-            <p className="mt-1 text-sm text-gray-500">
-              A senha deve ter pelo menos 6 caracteres
-            </p>
-          )}
         </div>
+        {type === 'register' && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            A senha deve ter pelo menos 6 caracteres
+          </p>
+        )}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <div className="error-message" role="alert">
             <span className="block sm:inline">{error}</span>
           </div>
         )}
         <button
           type="submit"
           disabled={loading}
-          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-            loading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className="btn-primary"
         >
-          {loading ? 'Processando...' : type === 'register' ? 'Cadastrar' : 'Entrar'}
+          {loading ? (
+            <div className="flex items-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processando...
+            </div>
+          ) : (
+            type === 'register' ? 'Cadastrar' : 'Entrar'
+          )}
         </button>
       </form>
     </div>

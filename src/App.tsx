@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { GraduationCap } from 'lucide-react';
 import { courses } from './data/courses';
 import { CourseCard } from './components/CourseCard';
 import { ProgressBar } from './components/ProgressBar';
 import { VideoPlayer } from './components/VideoPlayer';
 import { AuthForm } from './components/AuthForm';
+import { QuizForm } from './components/QuizForm';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ThemeToggle } from './components/ThemeToggle';
 import { Progress, User } from './types';
@@ -140,9 +141,20 @@ function App() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              Capacitação Aeronáutica
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Sistema de Treinamento para Mecânicos
+            </p>
+          </div>
           <AuthForm type="login" />
+          <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>Desenvolvido com ❤️ para a comunidade aeronáutica</p>
+          </div>
         </div>
       </div>
     );
@@ -184,6 +196,10 @@ function App() {
               element={user.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />}
             />
             <Route
+              path="/quiz"
+              element={<QuizForm />}
+            />
+            <Route
               path="/"
               element={
                 selectedCourse ? (
@@ -203,15 +219,23 @@ function App() {
                     />
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map(course => (
-                      <CourseCard
-                        key={course.id}
-                        course={course}
-                        progress={progress.find(p => p.courseId === course.id)}
-                        onStart={setSelectedCourseId}
-                      />
-                    ))}
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {courses.map(course => (
+                        <CourseCard
+                          key={course.id}
+                          course={course}
+                          progress={progress.find(p => p.courseId === course.id)}
+                          onStart={setSelectedCourseId}
+                        />
+                      ))}
+                    </div>
+                    <Link
+                      to="/quiz"
+                      className="block w-full py-4 px-6 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-lg"
+                    >
+                      Realizar Avaliação de Conhecimentos
+                    </Link>
                   </div>
                 )
               }
