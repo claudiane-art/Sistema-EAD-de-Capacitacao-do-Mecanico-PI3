@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Question {
@@ -246,6 +246,8 @@ export function QuizForm() {
   const [attempts, setAttempts] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
+  const [unansweredQuestion, setUnansweredQuestion] = useState<number | null>(null);
 
   useEffect(() => {
     loadQuizHistory();
@@ -282,6 +284,16 @@ export function QuizForm() {
   };
 
   const calculateScore = async () => {
+    // Verifica se todas as questões foram respondidas
+    const unansweredQuestions = answers.findIndex(answer => answer === -1);
+    if (unansweredQuestions !== -1) {
+      setUnansweredQuestion(unansweredQuestions + 1);
+      setShowAlert(true);
+      // Rola a página até o alerta
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     const correctAnswers = answers.filter((answer, index) => 
       answer === questions[index].correctAnswer
     ).length;
@@ -327,6 +339,28 @@ export function QuizForm() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
+      {showAlert && unansweredQuestion && (
+        <div className="animate-bounce bg-yellow-50 dark:bg-yellow-900/50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-lg">
+          <div className="flex items-center">
+            <AlertCircle className="h-6 w-6 text-yellow-400 mr-3" />
+            <div className="flex-1">
+              <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                Atenção!
+              </p>
+              <p className="text-yellow-700 dark:text-yellow-300">
+                Por favor, responda a questão {unansweredQuestion} antes de finalizar a avaliação.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAlert(false)}
+              className="ml-4 text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-200"
+            >
+              <XCircle className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
           Avaliação de Conhecimentos
