@@ -414,28 +414,6 @@ export function QuizForm() {
               </div>
             </div>
           )}
-          <div className="space-y-4 mb-8">
-            {questions.map((question, index) => (
-              <div
-                key={question.id}
-                className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
-              >
-                {answers[index] === question.correctAnswer ? (
-                  <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
-                ) : (
-                  <XCircle className="h-6 w-6 text-red-500 flex-shrink-0" />
-                )}
-                <div className="flex-1">
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {question.question}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    Resposta correta: {question.options[question.correctAnswer]}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
 
           {/*
           <div className="space-y-4 mb-8">
