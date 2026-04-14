@@ -301,17 +301,43 @@ const calculateScore = async () => {
     setShowResults(true);
 
     try {
-      // O AWAIT PRECISA DESTE ASYNC LÁ NO TOPO DA FUNÇÃO
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return;
 
-      // 3. Salva a tentativa no banco de dados
+      // 1. Salva a nova tentativa no histórico
       await supabase.from('quiz_attempts').insert([
-        {
-          user_id: user.id,
-          score: finalScore,
-        }
+        { user_id: authUser.id, score: finalScore }
       ]);
+
+      // 2. Busca a maior nota (bonusPoints) atual do usuário
+      const { data: userData } = await supabase
+        .from('users')
+        .select('bonusPoints, status')
+        .eq('id', authUser.id)
+        .single();
+
+      const currentBestScore = userData?.bonusPoints || 0;
+      const newStatus = finalScore >= 70 ? 'approved' : (userData?.status === 'approved' ? 'approved' : 'rejected');
+
+      // 3. Só atualiza os bonusPoints se a nota atual for maior que a anterior
+      const updateData: any = { status: newStatus };
+      
+      if (finalScore > currentBestScore) {
+        updateData.bonusPoints = Math.floor(finalScore);
+      }
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update(updateData)
+        .eq('id', authUser.id);
+
+      if (updateError) throw updateError;
+
+      loadQuizHistory();
+      
+    } catch (error) {
+      console.error('Erro ao atualizar nota máxima:', error);
+    }
 
       // 4. Lógica de Aprovação (Mínimo 70%)
       const newStatus = finalScore >= 70 ? 'approved' : 'rejected';
