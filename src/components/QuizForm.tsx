@@ -283,7 +283,7 @@ export function QuizForm() {
     setAnswers(newAnswers);
   };
 
-  const calculateScore = async () => {
+const calculateScore = async () => {
     // 1. Verifica se todas as questões foram respondidas
     const unansweredQuestionsIndex = answers.findIndex(answer => answer === -1);
     if (unansweredQuestionsIndex !== -1) {
@@ -293,7 +293,7 @@ export function QuizForm() {
       return;
     }
 
-    // 2. Calcula a pontuação (cada questão vale 5 pontos num total de 100)
+    // 2. Calcula a pontuação
     const correctCount = answers.filter((answer, index) => answer === questions[index].correctAnswer).length;
     const finalScore = (correctCount / questions.length) * 100;
     
@@ -301,8 +301,9 @@ export function QuizForm() {
     setShowResults(true);
 
     try {
+      // O AWAIT PRECISA DESTE ASYNC LÁ NO TOPO DA FUNÇÃO
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) throw new Error('Usuário não autenticado');
 
       // 3. Salva a tentativa no banco de dados
       await supabase.from('quiz_attempts').insert([
@@ -322,41 +323,10 @@ export function QuizForm() {
 
       if (updateError) throw updateError;
 
-      // Atualiza o histórico local para mostrar na tela
       loadQuizHistory();
       
     } catch (error) {
       console.error('Erro ao salvar resultado:', error);
-    }
-  };
-  
-    const correctAnswers = answers.filter((answer, index) => 
-      answer === questions[index].correctAnswer
-    ).length;
-    const newScore = (correctAnswers / questions.length) * 100;
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Usuário não autenticado');
-
-      const { error } = await supabase
-        .from('quiz_attempts')
-        .insert([
-          {
-            user_id: user.id,
-            score: newScore,
-            created_at: new Date().toISOString()
-          }
-        ]);
-
-      if (error) throw error;
-
-      setScore(newScore);
-      setScores([...scores, newScore]);
-      setAttempts(attempts + 1);
-      setShowResults(true);
-    } catch (error) {
-      console.error('Erro ao salvar tentativa:', error);
     }
   };
 
