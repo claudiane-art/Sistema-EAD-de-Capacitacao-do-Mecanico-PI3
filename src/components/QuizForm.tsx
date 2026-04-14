@@ -283,8 +283,7 @@ export function QuizForm() {
     setAnswers(newAnswers);
   };
 
-const calculateScore = async () => {
-    // 1. Verifica se todas as questões foram respondidas
+  const calculateScore = async () => {
     const unansweredQuestionsIndex = answers.findIndex(answer => answer === -1);
     if (unansweredQuestionsIndex !== -1) {
       setUnansweredQuestion(unansweredQuestionsIndex + 1);
@@ -293,7 +292,6 @@ const calculateScore = async () => {
       return;
     }
 
-    // 2. Calcula a pontuação
     const correctCount = answers.filter((answer, index) => answer === questions[index].correctAnswer).length;
     const finalScore = (correctCount / questions.length) * 100;
     
@@ -302,14 +300,12 @@ const calculateScore = async () => {
 
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!authUser) return;
+      if (!authUser) throw new Error('Usuário não autenticado');
 
-      // 1. Salva a nova tentativa no histórico
-      await supabase.from('quiz_attempts').insert([
-        { user_id: authUser.id, score: finalScore }
-      ]);
+      // Salva a tentativa no histórico (sempre salva todas as notas aqui)
+      await supabase.from('quiz_attempts').insert([{ user_id: authUser.id, score: finalScore }]);
 
-      // 2. Busca a maior nota (bonusPoints) atual do usuário
+      // Busca a melhor nota salva atualmente na tabela users
       const { data: userData } = await supabase
         .from('users')
         .select('bonusPoints, status')
@@ -317,11 +313,13 @@ const calculateScore = async () => {
         .single();
 
       const currentBestScore = userData?.bonusPoints || 0;
-      const newStatus = finalScore >= 70 ? 'approved' : (userData?.status === 'approved' ? 'approved' : 'rejected');
+      
+      // Se ele já foi aprovado uma vez, mantém aprovado para sempre
+      const newStatus = (userData?.status === 'approved' || finalScore >= 70) ? 'approved' : 'rejected';
 
-      // 3. Só atualiza os bonusPoints se a nota atual for maior que a anterior
       const updateData: any = { status: newStatus };
       
+      // AQUI ESTÁ A TRAVA: Só atualiza se a nota nova (finalScore) for maior que a antiga (currentBestScore)
       if (finalScore > currentBestScore) {
         updateData.bonusPoints = Math.floor(finalScore);
       }
@@ -336,23 +334,7 @@ const calculateScore = async () => {
       loadQuizHistory();
       
     } catch (error) {
-      console.error('Erro ao atualizar nota máxima:', error);
-    }
-
-      // 4. Lógica de Aprovação (Mínimo 70%)
-      const newStatus = finalScore >= 70 ? 'approved' : 'rejected';
-
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ status: newStatus })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
-
-      loadQuizHistory();
-      
-    } catch (error) {
-      console.error('Erro ao salvar resultado:', error);
+      console.error('Erro ao atualizar dados:', error);
     }
   };
 
