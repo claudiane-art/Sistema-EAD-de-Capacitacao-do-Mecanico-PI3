@@ -284,16 +284,52 @@ export function QuizForm() {
   };
 
   const calculateScore = async () => {
-    // Verifica se todas as questões foram respondidas
-    const unansweredQuestions = answers.findIndex(answer => answer === -1);
-    if (unansweredQuestions !== -1) {
-      setUnansweredQuestion(unansweredQuestions + 1);
+    // 1. Verifica se todas as questões foram respondidas
+    const unansweredQuestionsIndex = answers.findIndex(answer => answer === -1);
+    if (unansweredQuestionsIndex !== -1) {
+      setUnansweredQuestion(unansweredQuestionsIndex + 1);
       setShowAlert(true);
-      // Rola a página até o alerta
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
+    // 2. Calcula a pontuação (cada questão vale 5 pontos num total de 100)
+    const correctCount = answers.filter((answer, index) => answer === questions[index].correctAnswer).length;
+    const finalScore = (correctCount / questions.length) * 100;
+    
+    setScore(finalScore);
+    setShowResults(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 3. Salva a tentativa no banco de dados
+      await supabase.from('quiz_attempts').insert([
+        {
+          user_id: user.id,
+          score: finalScore,
+        }
+      ]);
+
+      // 4. Lógica de Aprovação (Mínimo 70%)
+      const newStatus = finalScore >= 70 ? 'approved' : 'rejected';
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ status: newStatus })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      // Atualiza o histórico local para mostrar na tela
+      loadQuizHistory();
+      
+    } catch (error) {
+      console.error('Erro ao salvar resultado:', error);
+    }
+  };
+  
     const correctAnswers = answers.filter((answer, index) => 
       answer === questions[index].correctAnswer
     ).length;
