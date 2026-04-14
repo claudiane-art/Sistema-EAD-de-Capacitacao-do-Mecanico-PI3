@@ -1,0 +1,14 @@
+name: Manter Supabase Ativo
+
+on:
+  schedule:
+    # Roda todos os dias às 09:00 da manhã no Brasil (12:00 UTC)
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Permite rodar manualmente pelo GitHub
+
+jobs:
+  ping_site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acessar site para acordar banco
+        run: curl -I https://capacitacaodomecanico.netlify.app/
